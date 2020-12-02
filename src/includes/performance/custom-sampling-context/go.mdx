@@ -1,0 +1,33 @@
+```go
+type myContextKey struct{}
+type myContextData struct {
+	// Store information for custom TracesSampler.
+	request *http.Request
+	// ...
+}
+
+err := sentry.Init(sentry.ClientOptions{
+	// A custom TracesSampler can access data from the span's context:
+	TracesSampler: sentry.TracesSamplerFunc(func(ctx sentry.SamplingContext) bool {
+		data, ok := ctx.Span.Context().Value(myContextKey{}).(*myContextData)
+		if !ok {
+			return false
+		}
+		return data.request.URL.Hostname() == "example.com"
+	}),
+})
+// ...
+
+r, err := http.NewRequest("GET", "http://example.com", nil)
+// ...
+data := &myContextData{
+	request: r,
+}
+ctx := context.WithValue(context.Background(), myContextKey{}, data)
+span := sentry.StartSpan(ctx, "operation")
+// When sampling the above span, the custom TracesSampler will have
+// access to data.
+
+// ...
+span.Finish()
+```
