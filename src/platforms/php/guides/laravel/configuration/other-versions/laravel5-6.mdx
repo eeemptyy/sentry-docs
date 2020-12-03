@@ -42,7 +42,7 @@ If you're on Laravel 5.5 or later the package will be auto-discovered. Otherwise
 Run:
 
 ```shell
-php artisan sentry:publish
+php artisan vendor:publish --provider="Sentry\Laravel\ServiceProvider"
 ```
 
 that creates the Sentry configuration file (`config/sentry.php`).
